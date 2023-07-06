@@ -9,7 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.NestedServletException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -42,6 +43,7 @@ class FilmControllerTest {
         mockMvc.perform(get("/films/clear")
                 .contentType(MediaType.APPLICATION_JSON));
     }
+
     @Test
     void emptyName() throws Exception {
         NestedServletException exception = assertThrows(NestedServletException.class,
@@ -111,14 +113,14 @@ class FilmControllerTest {
     @Test
     void updateFilm() throws Exception {
         mockMvc.perform(post("/films")
-                        .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
-                                "  \"description\": \"adipisicing\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": \"100\"\n" +
-                                "}")
-                        .contentType(MediaType.APPLICATION_JSON)
-                );
+                .content("{\n" +
+                        "  \"name\": \"nisi eiusmod\",\n" +
+                        "  \"description\": \"adipisicing\",\n" +
+                        "  \"releaseDate\": \"1967-03-25\",\n" +
+                        "  \"duration\": \"100\"\n" +
+                        "}")
+                .contentType(MediaType.APPLICATION_JSON)
+        );
         mockMvc.perform(put("/films")
                         .content("{\"id\":1,\"name\":\"Film Updated\",\"releaseDate\":\"1989-04-17\",\"description\":" +
                                 "\"New film update decription\",\"duration\":190,\"rate\":4}")

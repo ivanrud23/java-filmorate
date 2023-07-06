@@ -59,7 +59,7 @@ public class UserController {
         idCounter = 1;
     }
 
-    public static int counter(){
-        return idCounter ++;
+    public static int counter() {
+        return idCounter++;
     }
 }

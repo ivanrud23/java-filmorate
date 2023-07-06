@@ -61,7 +61,8 @@ public class FilmController {
         filmStorage.clear();
         idCounter = 1;
     }
-    public static int counter(){
-        return idCounter ++;
+
+    public static int counter() {
+        return idCounter++;
     }
 }
