@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -7,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.NestedServletException;
+import ru.yandex.practicum.filmorate.model.User;
+
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,20 +22,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class UserControllerTest {
 
-    //    @Autowired
-//    private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void addUser() throws Exception {
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", LocalDate.of(1946, 8, 20));
         mockMvc.perform(post("/users")
-                        .content("{\n" +
-                                "  \"login\": \"dolore\",\n" +
-                                "  \"name\": \"Nick Name\",\n" +
-                                "  \"email\": \"mail@mail.ru\",\n" +
-                                "  \"birthday\": \"1946-08-20\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -45,13 +45,9 @@ class UserControllerTest {
 
     @Test
     void emptyName() throws Exception {
+        User user = new User(1, "mail@mail.ru", "dolore", "", LocalDate.of(1946, 8, 20));
         mockMvc.perform(post("/users")
-                        .content("{\n" +
-                                "  \"login\": \"dolore\",\n" +
-                                "  \"name\": \"\",\n" +
-                                "  \"email\": \"mail@mail.ru\",\n" +
-                                "  \"birthday\": \"1946-08-20\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -62,15 +58,11 @@ class UserControllerTest {
 
     @Test
     void emptyLogin() throws Exception {
+        User user = new User(1, "mail@mail.ru", "", "Nick Name", LocalDate.of(1946, 8, 20));
         NestedServletException exception = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"login\": \"\",\n" +
-                                "  \"name\": \"Nick Name\",\n" +
-                                "  \"email\": \"mail@mail.ru\",\n" +
-                                "  \"birthday\": \"1946-08-20\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(user))
 
                 ));
         String exceptionMessage = exception.getCause().getMessage();
@@ -79,15 +71,11 @@ class UserControllerTest {
 
     @Test
     void emptyEmail() throws Exception {
+        User user = new User(1, "", "dolore", "Nick Name", LocalDate.of(1946, 8, 20));
         NestedServletException exception = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"login\": \"dolore\",\n" +
-                                "  \"name\": \"Nick Name\",\n" +
-                                "  \"email\": \"\",\n" +
-                                "  \"birthday\": \"1946-08-20\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(user))
 
                 ));
         String exceptionMessage = exception.getCause().getMessage();
@@ -96,15 +84,11 @@ class UserControllerTest {
 
     @Test
     void birthday() throws Exception {
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", LocalDate.of(2024, 8, 20));
         NestedServletException exception = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"login\": \"dolore\",\n" +
-                                "  \"name\": \"Nick Name\",\n" +
-                                "  \"email\": \"mail@mail.ru\",\n" +
-                                "  \"birthday\": \"2024-08-20\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(user))
 
                 ));
         String exceptionMessage = exception.getCause().getMessage();
@@ -113,23 +97,14 @@ class UserControllerTest {
 
     @Test
     void updateUser() throws Exception {
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", LocalDate.of(1946, 8, 20));
+        User updateUser = new User(1, "mail@yandex.ru", "doloreUpdate", "est adipisicing", LocalDate.of(1976, 9, 20));
         mockMvc.perform(post("/users")
-                .content("{\n" +
-                        "  \"login\": \"dolore\",\n" +
-                        "  \"name\": \"Nick Name\",\n" +
-                        "  \"email\": \"mail@mail.ru\",\n" +
-                        "  \"birthday\": \"1946-08-20\"\n" +
-                        "}")
+                .content(objectMapper.writeValueAsString(user))
                 .contentType(MediaType.APPLICATION_JSON)
         );
         mockMvc.perform(put("/users")
-                        .content("{\n" +
-                                "  \"login\": \"doloreUpdate\",\n" +
-                                "  \"name\": \"est adipisicing\",\n" +
-                                "  \"id\": 1,\n" +
-                                "  \"email\": \"mail@yandex.ru\",\n" +
-                                "  \"birthday\": \"1976-09-20\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(updateUser))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -144,24 +119,15 @@ class UserControllerTest {
 
     @Test
     void updateUnknownUser() throws Exception {
+        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", LocalDate.of(1946, 8, 20));
+        User updateUser = new User(99, "mail@yandex.ru", "doloreUpdate", "est adipisicing", LocalDate.of(1976, 9, 20));
         mockMvc.perform(post("/users")
-                .content("{\n" +
-                        "  \"login\": \"dolore\",\n" +
-                        "  \"name\": \"Nick Name\",\n" +
-                        "  \"email\": \"mail@mail.ru\",\n" +
-                        "  \"birthday\": \"1946-08-20\"\n" +
-                        "}")
+                .content(objectMapper.writeValueAsString(user))
                 .contentType(MediaType.APPLICATION_JSON)
         );
         NestedServletException exception = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(put("/users")
-                        .content("{\n" +
-                                "  \"login\": \"doloreUpdate\",\n" +
-                                "  \"name\": \"est adipisicing\",\n" +
-                                "  \"id\": 9999,\n" +
-                                "  \"email\": \"mail@yandex.ru\",\n" +
-                                "  \"birthday\": \"1976-09-20\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(updateUser))
                         .contentType(MediaType.APPLICATION_JSON)
                 ));
 
@@ -171,29 +137,17 @@ class UserControllerTest {
 
     @Test
     void getAllUsers() throws Exception {
+        User user1 = new User(1, "mail@mail.ru", "dolore", "Nick Name", LocalDate.of(1946, 8, 20));
+        User user2 = new User(1, "mail@mail2.ru", "dolore", "Nick Name", LocalDate.of(1946, 8, 20));
+        User user3 = new User(1, "mail@mail3.ru", "dolore", "Nick Name", LocalDate.of(1946, 8, 20));
         mockMvc.perform(post("/users")
-                .content("{\n" +
-                        "  \"login\": \"dolore\",\n" +
-                        "  \"name\": \"Nick Name\",\n" +
-                        "  \"email\": \"mail@mail.ru\",\n" +
-                        "  \"birthday\": \"1946-08-20\"\n" +
-                        "}")
+                .content(objectMapper.writeValueAsString(user1))
                 .contentType(MediaType.APPLICATION_JSON));
         mockMvc.perform(post("/users")
-                .content("{\n" +
-                        "  \"login\": \"dolore\",\n" +
-                        "  \"name\": \"Nick Name\",\n" +
-                        "  \"email\": \"mail@mail2.ru\",\n" +
-                        "  \"birthday\": \"1946-08-20\"\n" +
-                        "}")
+                .content(objectMapper.writeValueAsString(user2))
                 .contentType(MediaType.APPLICATION_JSON));
         mockMvc.perform(post("/users")
-                .content("{\n" +
-                        "  \"login\": \"dolore\",\n" +
-                        "  \"name\": \"Nick Name\",\n" +
-                        "  \"email\": \"mail@mail3.ru\",\n" +
-                        "  \"birthday\": \"1946-08-20\"\n" +
-                        "}")
+                .content(objectMapper.writeValueAsString(user3))
                 .contentType(MediaType.APPLICATION_JSON));
         mockMvc.perform(get("/users")
                         .contentType(MediaType.APPLICATION_JSON))

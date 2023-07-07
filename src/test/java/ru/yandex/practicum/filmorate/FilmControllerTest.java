@@ -8,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.NestedServletException;
+import ru.yandex.practicum.filmorate.model.Film;
+
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,20 +21,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class FilmControllerTest {
 
+
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
 
+
+
     @Test
     void addFilm() throws Exception {
+        Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100);
         mockMvc.perform(post("/films")
-                        .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
-                                "  \"description\": \"adipisicing\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": \"100\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(film))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -46,14 +48,10 @@ class FilmControllerTest {
 
     @Test
     void emptyName() throws Exception {
+        Film film = new Film(1, "", "adipisicing", LocalDate.of(1967, 3, 25), 100);
         NestedServletException exception = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(post("/films")
-                        .content("{\n" +
-                                "  \"name\": \"\",\n" +
-                                "  \"description\": \"adipisicing\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": \"100\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(film))
                         .contentType(MediaType.APPLICATION_JSON)
                 ));
         String exceptionMessage = exception.getCause().getMessage();
@@ -62,16 +60,12 @@ class FilmControllerTest {
 
     @Test
     void descriptionLength() throws Exception {
+        Film film = new Film(1, "nisi eiusmod", "хппухшёчифхцарзнфмглтмтхябёквнзшыьлмтбшожмбнъвиинулоошбщъхрккоъ\" +\n" +
+                "\"ёэйумбвбйзмизеьюцуюудзэблцизюаквзхееагшяйьшувхаюхсмаыцзьээюфэххрсювыкцкппастбблчепид\" +\n" +
+                "\"ырэьхдкупфжиетмтхэоэххютцплфкдбеящтщртмяцяыъпзйвёыъэху", LocalDate.of(1967, 3, 25), 100);
         NestedServletException exception = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(post("/films")
-                        .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
-                                "  \"description\": \"хппухшёчифхцарзнфмглтмтхябёквнзшыьлмтбшожмбнъвиинулоошбщъхрккоъ" +
-                                "ёэйумбвбйзмизеьюцуюудзэблцизюаквзхееагшяйьшувхаюхсмаыцзьээюфэххрсювыкцкппастбблчепид" +
-                                "ырэьхдкупфжиетмтхэоэххютцплфкдбеящтщртмяцяыъпзйвёыъэху\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": \"100\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(film))
                         .contentType(MediaType.APPLICATION_JSON)
                 ));
         String exceptionMessage = exception.getCause().getMessage();
@@ -80,14 +74,10 @@ class FilmControllerTest {
 
     @Test
     void releaseDate() throws Exception {
+        Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1867, 3, 25), 100);
         NestedServletException exception = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(post("/films")
-                        .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
-                                "  \"description\": \"adipisicing\",\n" +
-                                "  \"releaseDate\": \"1867-03-25\",\n" +
-                                "  \"duration\": \"100\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(film))
                         .contentType(MediaType.APPLICATION_JSON)
                 ));
         String exceptionMessage = exception.getCause().getMessage();
@@ -96,14 +86,10 @@ class FilmControllerTest {
 
     @Test
     void duration() throws Exception {
+        Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), -1);
         NestedServletException exception = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(post("/films")
-                        .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
-                                "  \"description\": \"adipisicing\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": \"-1\"\n" +
-                                "}")
+                        .content(objectMapper.writeValueAsString(film))
                         .contentType(MediaType.APPLICATION_JSON)
                 ));
         String exceptionMessage = exception.getCause().getMessage();
@@ -112,18 +98,14 @@ class FilmControllerTest {
 
     @Test
     void updateFilm() throws Exception {
+        Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100);
+        Film updateFilm = new Film(1, "Film Updated", "New film update decription", LocalDate.of(1989, 4, 17), 190);
         mockMvc.perform(post("/films")
-                .content("{\n" +
-                        "  \"name\": \"nisi eiusmod\",\n" +
-                        "  \"description\": \"adipisicing\",\n" +
-                        "  \"releaseDate\": \"1967-03-25\",\n" +
-                        "  \"duration\": \"100\"\n" +
-                        "}")
+                .content(objectMapper.writeValueAsString(film))
                 .contentType(MediaType.APPLICATION_JSON)
         );
         mockMvc.perform(put("/films")
-                        .content("{\"id\":1,\"name\":\"Film Updated\",\"releaseDate\":\"1989-04-17\",\"description\":" +
-                                "\"New film update decription\",\"duration\":190,\"rate\":4}")
+                        .content(objectMapper.writeValueAsString(updateFilm))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -138,18 +120,15 @@ class FilmControllerTest {
 
     @Test
     void updateUnknownFilm() throws Exception {
+        Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100);
+        Film updateFilm = new Film(99, "Film Updated", "New film update decription", LocalDate.of(1989, 4, 17), 190);
         mockMvc.perform(post("/films")
-                .content("{\n" +
-                        "  \"name\": \"nisi eiusmod\",\n" +
-                        "  \"description\": \"adipisicing\",\n" +
-                        "  \"releaseDate\": \"1967-03-25\",\n" +
-                        "  \"duration\": \"100\"\n" +
-                        "}")
+                .content(objectMapper.writeValueAsString(film))
                 .contentType(MediaType.APPLICATION_JSON)
         );
         NestedServletException exception = assertThrows(NestedServletException.class,
                 () -> mockMvc.perform(put("/films")
-                        .content("{\"id\":99,\"name\":\"Film Updated\",\"releaseDate\":\"1989-04-17\",\"description\":\"New film update decription\",\"duration\":190,\"rate\":4}")
+                        .content(objectMapper.writeValueAsString(updateFilm))
                         .contentType(MediaType.APPLICATION_JSON)
                 ));
         String exceptionMessage = exception.getCause().getMessage();
@@ -158,31 +137,19 @@ class FilmControllerTest {
 
     @Test
     void getAllFilms() throws Exception {
+        Film film1 = new Film(1, "nisi eiusmod_1", "adipisicing", LocalDate.of(1967, 3, 25), 100);
+        Film film2 = new Film(2, "nisi eiusmod_2", "adipisicing", LocalDate.of(1967, 3, 25), 100);
+        Film film3 = new Film(3, "nisi eiusmod_3", "adipisicing", LocalDate.of(1967, 3, 25), 100);
         mockMvc.perform(post("/films")
-                .content("{\n" +
-                        "  \"name\": \"nisi eiusmod_1\",\n" +
-                        "  \"description\": \"adipisicing\",\n" +
-                        "  \"releaseDate\": \"1967-03-25\",\n" +
-                        "  \"duration\": \"100\"\n" +
-                        "}")
+                .content(objectMapper.writeValueAsString(film1))
                 .contentType(MediaType.APPLICATION_JSON)
         );
         mockMvc.perform(post("/films")
-                .content("{\n" +
-                        "  \"name\": \"nisi eiusmod_2\",\n" +
-                        "  \"description\": \"adipisicing\",\n" +
-                        "  \"releaseDate\": \"1967-03-25\",\n" +
-                        "  \"duration\": \"100\"\n" +
-                        "}")
+                .content(objectMapper.writeValueAsString(film2))
                 .contentType(MediaType.APPLICATION_JSON)
         );
         mockMvc.perform(post("/films")
-                .content("{\n" +
-                        "  \"name\": \"nisi eiusmod_3\",\n" +
-                        "  \"description\": \"adipisicing\",\n" +
-                        "  \"releaseDate\": \"1967-03-25\",\n" +
-                        "  \"duration\": \"100\"\n" +
-                        "}")
+                .content(objectMapper.writeValueAsString(film3))
                 .contentType(MediaType.APPLICATION_JSON)
         );
         mockMvc.perform(get("/films")
