@@ -6,17 +6,20 @@ import lombok.Data;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 public class User {
-    private int id;
+    private long id;
     @NotBlank(message = "email is mandatory")
-    @Email(message = "email is invalid",regexp = "[a-zA-Z0-9]{1,20}")
+    @Email(message = "email is invalid")
     private String email;
     @NotBlank(message = "login is mandatory")
     private String login;
+
     private String name;
     private LocalDate birthday;
-
+    private final Set<Long> friends = new HashSet<>();
 }

@@ -1,71 +1,70 @@
 package ru.yandex.practicum.filmorate.controller;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exeption.NoDataException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
+@RequiredArgsConstructor
 public class FilmController {
-    private final HashMap<Integer, Film> filmStorage = new HashMap<>();
-    private static int idCounter = 1;
 
+    FilmService filmService = new FilmService();
 
     @PostMapping()
-    public Film addFilm(@Valid @RequestBody Film newFilm, BindingResult bindingResult) throws ValidationException {
-        if (bindingResult.hasErrors()) {
-            if (newFilm.getName().isBlank() || newFilm.getName() == null) {
-                log.info("Название не может быть пустым");
-                throw new ValidationException("Название не может быть пустым");
-            }
-            if (newFilm.getDescription().length() > 200) {
-                log.info("Превышена максимальная длина описания — 200 символов");
-                throw new ValidationException("Превышена максимальная длина описания — 200 символов");
-            }
-            if (newFilm.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-                log.info("дата релиза не может быть раньше 28 декабря 1895 года");
-                throw new ValidationException("дата релиза не может быть раньше 28 декабря 1895 года");
-            }
-            if (newFilm.getDuration() < 1) {
-                log.info("продолжительность фильма должна быть положительной");
-                throw new ValidationException("продолжительность фильма должна быть положительной");
-            }
-        }
-        newFilm.setId(counter());
-        filmStorage.put(newFilm.getId(), newFilm);
-        return newFilm;
+    public Film addFilm(@Valid @RequestBody Film newFilm) throws ValidationException {
+        return filmService.getInMemoryFilmStorage().addFilm(newFilm);
     }
 
     @PutMapping()
-    public Film updateFilm(@RequestBody Film newFilm) throws ValidationException {
-        if (!filmStorage.containsKey(newFilm.getId())) {
-            throw new ValidationException("такого фильма не существует");
-        }
-        filmStorage.put(newFilm.getId(), newFilm);
-        return newFilm;
+    public Film updateFilm(@Valid @RequestBody Film newFilm) throws ValidationException {
+        return filmService.getInMemoryFilmStorage().updateFilm(newFilm);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void likeFilm(@PathVariable String id, @PathVariable String userId) throws ValidationException, NoDataException {
+        filmService.addLikeToFilm(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLikeFilm(@PathVariable String id, @PathVariable String userId) throws ValidationException, NoDataException {
+        filmService.removeLikeFromFilm(id, userId);
     }
 
     @GetMapping()
     public Collection<Film> getAllFilms() {
-        return filmStorage.values();
+        return filmService.getInMemoryFilmStorage().getAllFilms();
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> rateFilms(@RequestParam(defaultValue = "10") String count) throws ValidationException {
+        return filmService.getTopTen(count);
+    }
+
+
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable(name = "id", required = false) String idString) throws ValidationException, NoDataException {
+        if (idString.isBlank() || idString.isEmpty()) {
+            throw new ValidationException("id is empty");
+        }
+        Long id = Long.parseLong(idString);
+        return filmService.getInMemoryFilmStorage().getFilmById(id);
+
     }
 
     @GetMapping("/clear")
-    public void clearUsers() {
-        filmStorage.clear();
-        idCounter = 1;
+    public void clearFilms() {
+        filmService.getInMemoryFilmStorage().clearFilms();
     }
 
-    public static int counter() {
-        return idCounter++;
-    }
+
 }
