@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.Data;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NoDataException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
@@ -12,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-//@Data
 public class InMemoryFilmStorage implements FilmStorage {
     private static final Map<Long, Film> filmStorage = new HashMap<>();
     private static int idCounter = 1;

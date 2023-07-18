@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NoDataException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService {
 
-     InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
+    InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
 
     public void addLikeToFilm(String filmIdString, String userIdString) throws NoDataException {
         if (filmIdString.contains("-") || userIdString.contains("-")) {

@@ -42,7 +42,7 @@ public class UserService {
 
     public Collection<User> listOfFriends(String userString) throws ValidationException, NoDataException {
         User user = inMemoryUserStorage.getById(userString);
-        if (user.getFriends()==null) {
+        if (user.getFriends() == null) {
             throw new ValidationException("Список друзей пуст");
         }
         List<User> listOfFriends = new ArrayList<>();
