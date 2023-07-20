@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NoDataException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
@@ -13,26 +13,47 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Service
-@Data
 @RequiredArgsConstructor
 public class UserService {
 
-    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
+    @Autowired
+    private final InMemoryUserStorage inMemoryUserStorage;
 
-    public void addFriend(String id1, String id2) throws ValidationException, NoDataException {
-        if (id1.contains("-") || id2.contains("-")) {
+    public User addUser(User newUser) throws ValidationException {
+        return inMemoryUserStorage.addUser(newUser);
+    }
+
+    public User updateUser(User newUser) throws ValidationException {
+        return inMemoryUserStorage.updateUser(newUser);
+    }
+
+    public User getById(Long id) throws NoDataException {
+        return inMemoryUserStorage.getById(id);
+    }
+
+    public Collection<User> getAllUsers() {
+        return inMemoryUserStorage.getAllUsers();
+    }
+
+    public void clearUsers() {
+        inMemoryUserStorage.clearUsers();
+    }
+
+    public void addFriend(Long id1, Long id2) throws NoDataException {
+        if (id1 < 0 || id2 < 0) {
             throw new NoDataException("id не может быть отрицательным");
         }
         User user1 = inMemoryUserStorage.getById(id1);
         User user2 = inMemoryUserStorage.getById(id2);
-        user1.getFriends().add(Long.parseLong(id2));
-        user2.getFriends().add(Long.parseLong(id1));
+        user1.getFriends().add(id2);
+        user2.getFriends().add(id1);
     }
 
-    public void removeFriend(String id1, String id2) throws ValidationException, NoDataException {
-        if (id1.contains("-") || id2.contains("-")) {
-            throw new ValidationException("id не может быть отрицательным");
+    public void removeFriend(Long id1, Long id2) throws NoDataException {
+        if (id1 < 0 || id2 < 0) {
+            throw new NoDataException("id не может быть отрицательным");
         }
         User user1 = inMemoryUserStorage.getById(id1);
         User user2 = inMemoryUserStorage.getById(id2);
@@ -40,31 +61,33 @@ public class UserService {
         user2.getFriends().remove(user1.getId());
     }
 
-    public Collection<User> listOfFriends(String userString) throws ValidationException, NoDataException {
-        User user = inMemoryUserStorage.getById(userString);
+    public List<User> listOfFriends(Long userId) throws ValidationException, NoDataException {
+        User user = inMemoryUserStorage.getById(userId);
         if (user.getFriends() == null) {
             throw new ValidationException("Список друзей пуст");
         }
         List<User> listOfFriends = new ArrayList<>();
         for (Long friendId : user.getFriends()) {
-            listOfFriends.add(inMemoryUserStorage.getById(friendId.toString()));
+            listOfFriends.add(inMemoryUserStorage.getById(friendId));
         }
         return listOfFriends;
     }
 
-    public Collection<User> listCommonFriends(String id1, String id2) throws ValidationException, NoDataException {
-        if (id1.contains("-") || id2.contains("-")) {
-            throw new ValidationException("id не может быть отрицательным");
+    public List<User> listCommonFriends(Long id1, Long id2) throws NoDataException {
+        if (id1 < 0 || id2 < 0) {
+            throw new NoDataException("id не может быть отрицательным");
         }
         User user1 = inMemoryUserStorage.getById(id1);
         User user2 = inMemoryUserStorage.getById(id2);
-        List<User> listOfFriends = new ArrayList<>();
-        List<Long> listOfId = user1.getFriends().stream()
+        return user1.getFriends().stream()
                 .filter(id -> user2.getFriends().contains(id))
+                .map(id -> {
+                    try {
+                        return inMemoryUserStorage.getById(id);
+                    } catch (NoDataException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .collect(Collectors.toList());
-        for (Long id : listOfId) {
-            listOfFriends.add(inMemoryUserStorage.getById(id.toString()));
-        }
-        return listOfFriends;
     }
 }

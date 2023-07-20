@@ -15,7 +15,8 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -26,7 +27,6 @@ class FilmControllerTest {
     private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
-
 
 
     @Test
@@ -46,17 +46,6 @@ class FilmControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
     }
 
-//    @Test
-//    void emptyName() throws Exception {
-//        Film film = new Film(1, "", "adipisicing", LocalDate.of(1967, 3, 25), 100);
-//        NestedServletException exception = assertThrows(NestedServletException.class,
-//                () -> mockMvc.perform(post("/films")
-//                        .content(objectMapper.writeValueAsString(film))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                ));
-//        String exceptionMessage = exception.getCause().getMessage();
-//        assertEquals("Название не может быть пустым", exceptionMessage);
-//    }
 
     @Test
     void descriptionLength() throws Exception {
@@ -84,17 +73,6 @@ class FilmControllerTest {
         assertEquals("дата релиза не может быть раньше 28 декабря 1895 года", exceptionMessage);
     }
 
-//    @Test
-//    void duration() throws Exception {
-//        Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), -1);
-//        NestedServletException exception = assertThrows(NestedServletException.class,
-//                () -> mockMvc.perform(post("/films")
-//                        .content(objectMapper.writeValueAsString(film))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                ));
-//        String exceptionMessage = exception.getCause().getMessage();
-//        assertEquals("продолжительность фильма должна быть положительной", exceptionMessage);
-//    }
 
     @Test
     void updateFilm() throws Exception {
@@ -135,29 +113,4 @@ class FilmControllerTest {
         assertEquals("такого фильма не существует", exceptionMessage);
     }
 
-//    @Test
-//    void getAllFilms() throws Exception {
-//        Film film1 = new Film(1, "nisi eiusmod_1", "adipisicing", LocalDate.of(1967, 3, 25), 100);
-//        Film film2 = new Film(2, "nisi eiusmod_2", "adipisicing", LocalDate.of(1967, 3, 25), 100);
-//        Film film3 = new Film(3, "nisi eiusmod_3", "adipisicing", LocalDate.of(1967, 3, 25), 100);
-//        mockMvc.perform(post("/films")
-//                .content(objectMapper.writeValueAsString(film1))
-//                .contentType(MediaType.APPLICATION_JSON)
-//        );
-//        mockMvc.perform(post("/films")
-//                .content(objectMapper.writeValueAsString(film2))
-//                .contentType(MediaType.APPLICATION_JSON)
-//        );
-//        mockMvc.perform(post("/films")
-//                .content(objectMapper.writeValueAsString(film3))
-//                .contentType(MediaType.APPLICATION_JSON)
-//        );
-//        mockMvc.perform(get("/films")
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(content().string("[{\"id\":1,\"name\":\"nisi eiusmod_1\",\"description\":" +
-//                        "\"adipisicing\",\"releaseDate\":\"1967-03-25\",\"duration\":100},{\"id\":2,\"name\":" +
-//                        "\"nisi eiusmod_2\",\"description\":\"adipisicing\",\"releaseDate\":\"1967-03-25\",\"duration\":" +
-//                        "100},{\"id\":3,\"name\":\"nisi eiusmod_3\",\"description\":\"adipisicing\",\"releaseDate\":" +
-//                        "\"1967-03-25\",\"duration\":100}]"));
-//    }
 }

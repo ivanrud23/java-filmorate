@@ -12,11 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@Data
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> userStorage = new HashMap<>();
     private int idCounter = 1;
 
+    @Override
     public User addUser(User newUser) throws ValidationException {
 
         if (newUser.getEmail() == null || newUser.getEmail().isBlank() || !newUser.getEmail().contains("@")) {
@@ -36,6 +36,7 @@ public class InMemoryUserStorage implements UserStorage {
         return newUser;
     }
 
+    @Override
     public User updateUser(User newUser) throws ValidationException {
         if (!userStorage.containsKey(newUser.getId())) {
             throw new ValidationException("такого пользователя не существует");
@@ -48,14 +49,14 @@ public class InMemoryUserStorage implements UserStorage {
         return userStorage.values();
     }
 
-    public User getById(String idString) throws NoDataException {
-        Long id = Long.parseLong(idString);
+    public User getById(Long id) throws NoDataException {
         if (!userStorage.containsKey(id)) {
             throw new NoDataException("такого пользователя не существует");
         }
         return userStorage.get(id);
     }
 
+    @Override
     public void clearUsers() {
         userStorage.clear();
         idCounter = 1;

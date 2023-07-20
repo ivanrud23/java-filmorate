@@ -15,7 +15,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     private static final Map<Long, Film> filmStorage = new HashMap<>();
     private static int idCounter = 1;
 
-
+    @Override
     public Film addFilm(Film newFilm) throws ValidationException {
         if (newFilm.getName().isBlank() || newFilm.getName() == null) {
             throw new ValidationException("Название не может быть пустым");
@@ -34,7 +34,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return newFilm;
     }
 
-
+    @Override
     public Film updateFilm(Film newFilm) throws ValidationException {
         if (!filmStorage.containsKey(newFilm.getId())) {
             throw new ValidationException("такого фильма не существует");
@@ -58,6 +58,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return idCounter++;
     }
 
+    @Override
     public void clearFilms() {
         filmStorage.clear();
         idCounter = 1;
