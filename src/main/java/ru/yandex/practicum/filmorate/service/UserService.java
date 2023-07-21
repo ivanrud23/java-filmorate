@@ -8,8 +8,6 @@ import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +31,7 @@ public class UserService {
         return inMemoryUserStorage.getById(id);
     }
 
-    public Collection<User> getAllUsers() {
+    public List<User> getAllUsers() {
         return inMemoryUserStorage.getAllUsers();
     }
 
@@ -66,11 +64,9 @@ public class UserService {
         if (user.getFriends() == null) {
             throw new ValidationException("Список друзей пуст");
         }
-        List<User> listOfFriends = new ArrayList<>();
-        for (Long friendId : user.getFriends()) {
-            listOfFriends.add(inMemoryUserStorage.getById(friendId));
-        }
-        return listOfFriends;
+        return user.getFriends().stream()
+                .map(this::getById)
+                .collect(Collectors.toList());
     }
 
     public List<User> listCommonFriends(Long id1, Long id2) throws NoDataException {
@@ -81,13 +77,7 @@ public class UserService {
         User user2 = inMemoryUserStorage.getById(id2);
         return user1.getFriends().stream()
                 .filter(id -> user2.getFriends().contains(id))
-                .map(id -> {
-                    try {
-                        return inMemoryUserStorage.getById(id);
-                    } catch (NoDataException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
+                .map(inMemoryUserStorage::getById)
                 .collect(Collectors.toList());
     }
 }

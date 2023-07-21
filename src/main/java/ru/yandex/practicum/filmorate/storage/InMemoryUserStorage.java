@@ -6,8 +6,9 @@ import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -18,12 +19,6 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addUser(User newUser) throws ValidationException {
 
-        if (newUser.getEmail() == null || newUser.getEmail().isBlank() || !newUser.getEmail().contains("@")) {
-            throw new ValidationException("электронная почта не может быть пустой и должна содержать символ @");
-        }
-        if (newUser.getLogin().isBlank() || newUser.getLogin() == null || newUser.getLogin().contains(" ")) {
-            throw new ValidationException("логин не может быть пустым и содержать пробелы");
-        }
         if (newUser.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("дата рождения не может быть в будущем");
         }
@@ -38,16 +33,18 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(User newUser) throws ValidationException {
         if (!userStorage.containsKey(newUser.getId())) {
-            throw new ValidationException("такого пользователя не существует");
+            throw new NoDataException("такого пользователя не существует");
         }
         userStorage.put(newUser.getId(), newUser);
         return newUser;
     }
 
-    public Collection<User> getAllUsers() {
-        return userStorage.values();
+    @Override
+    public List<User> getAllUsers() {
+        return new ArrayList<>(userStorage.values());
     }
 
+    @Override
     public User getById(Long id) throws NoDataException {
         if (!userStorage.containsKey(id)) {
             throw new NoDataException("такого пользователя не существует");

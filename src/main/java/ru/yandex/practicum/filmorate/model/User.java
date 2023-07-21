@@ -14,11 +14,10 @@ import java.util.Set;
 public class User {
     private long id;
     @NotBlank(message = "email is mandatory")
-    @Email(message = "email is invalid")
+    @Email
     private String email;
     @NotBlank(message = "login is mandatory")
     private String login;
-
     private String name;
     private LocalDate birthday;
     private final Set<Long> friends = new HashSet<>();

@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +26,7 @@ public class FilmService {
         return inMemoryFilmStorage.updateFilm(newFilm);
     }
 
-    public Collection<Film> getAllFilms() {
+    public List<Film> getAllFilms() {
         return inMemoryFilmStorage.getAllFilms();
     }
 
