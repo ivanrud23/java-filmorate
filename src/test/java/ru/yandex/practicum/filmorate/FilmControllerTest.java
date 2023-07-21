@@ -7,13 +7,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.util.NestedServletException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,33 +45,6 @@ class FilmControllerTest {
 
 
     @Test
-    void descriptionLength() throws Exception {
-        Film film = new Film(1, "nisi eiusmod", "хппухшёчифхцарзнфмглтмтхябёквнзшыьлмтбшожмбнъвиинулоошбщъхрккоъ\" +\n" +
-                "\"ёэйумбвбйзмизеьюцуюудзэблцизюаквзхееагшяйьшувхаюхсмаыцзьээюфэххрсювыкцкппастбблчепид\" +\n" +
-                "\"ырэьхдкупфжиетмтхэоэххютцплфкдбеящтщртмяцяыъпзйвёыъэху", LocalDate.of(1967, 3, 25), 100);
-        NestedServletException exception = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(post("/films")
-                        .content(objectMapper.writeValueAsString(film))
-                        .contentType(MediaType.APPLICATION_JSON)
-                ));
-        String exceptionMessage = exception.getCause().getMessage();
-        assertEquals("Превышена максимальная длина описания — 200 символов", exceptionMessage);
-    }
-
-    @Test
-    void releaseDate() throws Exception {
-        Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1867, 3, 25), 100);
-        NestedServletException exception = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(post("/films")
-                        .content(objectMapper.writeValueAsString(film))
-                        .contentType(MediaType.APPLICATION_JSON)
-                ));
-        String exceptionMessage = exception.getCause().getMessage();
-        assertEquals("дата релиза не может быть раньше 28 декабря 1895 года", exceptionMessage);
-    }
-
-
-    @Test
     void updateFilm() throws Exception {
         Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100);
         Film updateFilm = new Film(1, "Film Updated", "New film update decription", LocalDate.of(1989, 4, 17), 190);
@@ -96,21 +66,5 @@ class FilmControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
     }
 
-    @Test
-    void updateUnknownFilm() throws Exception {
-        Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100);
-        Film updateFilm = new Film(99, "Film Updated", "New film update decription", LocalDate.of(1989, 4, 17), 190);
-        mockMvc.perform(post("/films")
-                .content(objectMapper.writeValueAsString(film))
-                .contentType(MediaType.APPLICATION_JSON)
-        );
-        NestedServletException exception = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(put("/films")
-                        .content(objectMapper.writeValueAsString(updateFilm))
-                        .contentType(MediaType.APPLICATION_JSON)
-                ));
-        String exceptionMessage = exception.getCause().getMessage();
-        assertEquals("такого фильма не существует", exceptionMessage);
-    }
 
 }

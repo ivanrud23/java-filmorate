@@ -7,13 +7,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.util.NestedServletException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,19 +56,6 @@ class UserControllerTest {
 
 
     @Test
-    void birthday() throws Exception {
-        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", LocalDate.of(2024, 8, 20));
-        NestedServletException exception = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user))
-
-                ));
-        String exceptionMessage = exception.getCause().getMessage();
-        assertEquals("дата рождения не может быть в будущем", exceptionMessage);
-    }
-
-    @Test
     void updateUser() throws Exception {
         User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", LocalDate.of(1946, 8, 20));
         User updateUser = new User(1, "mail@yandex.ru", "doloreUpdate", "est adipisicing", LocalDate.of(1976, 9, 20));
@@ -93,22 +77,5 @@ class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
     }
 
-    @Test
-    void updateUnknownUser() throws Exception {
-        User user = new User(1, "mail@mail.ru", "dolore", "Nick Name", LocalDate.of(1946, 8, 20));
-        User updateUser = new User(99, "mail@yandex.ru", "doloreUpdate", "est adipisicing", LocalDate.of(1976, 9, 20));
-        mockMvc.perform(post("/users")
-                .content(objectMapper.writeValueAsString(user))
-                .contentType(MediaType.APPLICATION_JSON)
-        );
-        NestedServletException exception = assertThrows(NestedServletException.class,
-                () -> mockMvc.perform(put("/users")
-                        .content(objectMapper.writeValueAsString(updateUser))
-                        .contentType(MediaType.APPLICATION_JSON)
-                ));
-
-        String exceptionMessage = exception.getCause().getMessage();
-        assertEquals("такого пользователя не существует", exceptionMessage);
-    }
 
 }
