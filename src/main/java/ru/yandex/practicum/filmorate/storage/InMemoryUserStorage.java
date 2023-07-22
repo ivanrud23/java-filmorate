@@ -2,10 +2,8 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NoDataException;
-import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +15,7 @@ public class InMemoryUserStorage implements UserStorage {
     private int idCounter = 1;
 
     @Override
-    public User addUser(User newUser) throws ValidationException {
-
-        if (newUser.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("дата рождения не может быть в будущем");
-        }
+    public User addUser(User newUser) {
         if (newUser.getName() == null || newUser.getName().isBlank()) {
             newUser.setName(newUser.getLogin());
         }
@@ -31,7 +25,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(User newUser) throws ValidationException {
+    public User updateUser(User newUser) {
         if (!userStorage.containsKey(newUser.getId())) {
             throw new NoDataException("такого пользователя не существует");
         }
@@ -45,7 +39,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getById(Long id) throws NoDataException {
+    public User getById(Long id) {
         if (!userStorage.containsKey(id)) {
             throw new NoDataException("такого пользователя не существует");
         }

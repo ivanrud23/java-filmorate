@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NoDataException;
-import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
@@ -18,11 +17,11 @@ public class FilmService {
 
     private final InMemoryFilmStorage inMemoryFilmStorage;
 
-    public Film addFilm(Film newFilm) throws ValidationException {
+    public Film addFilm(Film newFilm) {
         return inMemoryFilmStorage.addFilm(newFilm);
     }
 
-    public Film updateFilm(Film newFilm) throws ValidationException {
+    public Film updateFilm(Film newFilm) {
         return inMemoryFilmStorage.updateFilm(newFilm);
     }
 
@@ -30,7 +29,7 @@ public class FilmService {
         return inMemoryFilmStorage.getAllFilms();
     }
 
-    public Film getFilmById(Long id) throws NoDataException {
+    public Film getFilmById(Long id) {
         return inMemoryFilmStorage.getFilmById(id);
     }
 
@@ -38,14 +37,14 @@ public class FilmService {
         inMemoryFilmStorage.clearFilms();
     }
 
-    public void addLikeToFilm(Long filmId, Long userId) throws NoDataException {
+    public void addLikeToFilm(Long filmId, Long userId) {
         if (filmId < 0 || userId < 0) {
             throw new NoDataException("id не может быть отрицательным");
         }
         inMemoryFilmStorage.getFilmById(filmId).getLikedUserId().add(userId);
     }
 
-    public void removeLikeFromFilm(Long filmId, Long userId) throws NoDataException {
+    public void removeLikeFromFilm(Long filmId, Long userId) {
         if (filmId < 0 || userId < 0) {
             throw new NoDataException("id не может быть отрицательным");
         }

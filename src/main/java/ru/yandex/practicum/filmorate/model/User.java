@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.annotation.UserBirthday;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -19,6 +20,7 @@ public class User {
     @NotBlank(message = "login is mandatory")
     private String login;
     private String name;
+    @UserBirthday
     private LocalDate birthday;
     private final Set<Long> friends = new HashSet<>();
 }

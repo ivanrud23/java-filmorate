@@ -19,15 +19,15 @@ public class UserService {
     @Autowired
     private final InMemoryUserStorage inMemoryUserStorage;
 
-    public User addUser(User newUser) throws ValidationException {
+    public User addUser(User newUser) {
         return inMemoryUserStorage.addUser(newUser);
     }
 
-    public User updateUser(User newUser) throws ValidationException {
+    public User updateUser(User newUser) {
         return inMemoryUserStorage.updateUser(newUser);
     }
 
-    public User getById(Long id) throws NoDataException {
+    public User getById(Long id) {
         return inMemoryUserStorage.getById(id);
     }
 
@@ -39,7 +39,7 @@ public class UserService {
         inMemoryUserStorage.clearUsers();
     }
 
-    public void addFriend(Long id1, Long id2) throws NoDataException {
+    public void addFriend(Long id1, Long id2) {
         if (id1 < 0 || id2 < 0) {
             throw new NoDataException("id не может быть отрицательным");
         }
@@ -49,7 +49,7 @@ public class UserService {
         user2.getFriends().add(id1);
     }
 
-    public void removeFriend(Long id1, Long id2) throws NoDataException {
+    public void removeFriend(Long id1, Long id2) {
         if (id1 < 0 || id2 < 0) {
             throw new NoDataException("id не может быть отрицательным");
         }
@@ -59,7 +59,7 @@ public class UserService {
         user2.getFriends().remove(user1.getId());
     }
 
-    public List<User> listOfFriends(Long userId) throws ValidationException, NoDataException {
+    public List<User> listOfFriends(Long userId) {
         User user = inMemoryUserStorage.getById(userId);
         if (user.getFriends() == null) {
             throw new ValidationException("Список друзей пуст");
@@ -69,7 +69,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<User> listCommonFriends(Long id1, Long id2) throws NoDataException {
+    public List<User> listCommonFriends(Long id1, Long id2) {
         if (id1 < 0 || id2 < 0) {
             throw new NoDataException("id не может быть отрицательным");
         }
