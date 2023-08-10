@@ -52,6 +52,16 @@ public class InMemoryUserStorage implements UserStorage {
         idCounter = 1;
     }
 
+    @Override
+    public void addUsersToFriend(User user1, User user2) {
+
+    }
+
+    @Override
+    public void removeUserFromFriends(User user1, User user2) {
+
+    }
+
     public int counter() {
         return idCounter++;
     }
