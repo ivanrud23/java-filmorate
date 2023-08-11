@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Component("userDbStorage")
 @Data
@@ -50,7 +51,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User getById(Long id) {
+    public Optional<User> getById(Long id) {
         return getUserFromDb(id);
     }
 
@@ -71,7 +72,7 @@ public class UserDbStorage implements UserStorage {
                 newUser.getBirthday()));
     }
 
-    private User getUserFromDb(Long id) {
+    public Optional<User> getUserFromDb(Long id) {
         if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM users WHERE users_id = %d", id), Integer.class) == 0) {
             throw new NoDataException("такого пользователя не существует");
         }
@@ -88,7 +89,7 @@ public class UserDbStorage implements UserStorage {
         if (!friendsRows.isEmpty()) {
             user.getFriends().addAll(friendsRows);
         }
-        return user;
+        return Optional.of(user);
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
