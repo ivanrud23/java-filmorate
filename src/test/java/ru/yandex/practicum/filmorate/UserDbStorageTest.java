@@ -22,7 +22,59 @@ public class UserDbStorageTest {
     private final ru.yandex.practicum.filmorate.storage.UserDbStorage userStorage;
 
     @Test
-    public void testFindUserById() {
+    public void testCreateFindUserById() {
+
+        userStorage.addUser(new User(1, "mail@mail.ru", "sdf", "dfs", LocalDate.of(1946, 8, 20)));
+        Optional<User> userOptional = userStorage.getUserFromDb(Long.valueOf(1));
+
+        assertThat(userOptional)
+                .isPresent()
+                .hasValueSatisfying(user ->
+                        assertThat(user).hasFieldOrPropertyWithValue("id", Long.valueOf(1))
+                );
+    }
+
+    @Test
+    public void testUpdateUserById() {
+
+        userStorage.addUser(new User(1, "mail@mail.ru", "sdf", "dfs", LocalDate.of(1946, 8, 20)));
+        Optional<User> userOptional = userStorage.getUserFromDb(Long.valueOf(1));
+
+        assertThat(userOptional)
+                .isPresent()
+                .hasValueSatisfying(user ->
+                        assertThat(user).hasFieldOrPropertyWithValue("id", Long.valueOf(1))
+                );
+    }
+
+    @Test
+    public void testAddUserToFriends() {
+
+        userStorage.addUser(new User(1, "mail@mail.ru", "sdf", "dfs", LocalDate.of(1946, 8, 20)));
+        Optional<User> userOptional = userStorage.getUserFromDb(Long.valueOf(1));
+
+        assertThat(userOptional)
+                .isPresent()
+                .hasValueSatisfying(user ->
+                        assertThat(user).hasFieldOrPropertyWithValue("id", Long.valueOf(1))
+                );
+    }
+
+    @Test
+    public void testRemoveUserFriends() {
+
+        userStorage.addUser(new User(1, "mail@mail.ru", "sdf", "dfs", LocalDate.of(1946, 8, 20)));
+        Optional<User> userOptional = userStorage.getUserFromDb(Long.valueOf(1));
+
+        assertThat(userOptional)
+                .isPresent()
+                .hasValueSatisfying(user ->
+                        assertThat(user).hasFieldOrPropertyWithValue("id", Long.valueOf(1))
+                );
+    }
+
+    @Test
+    public void testGetAllUsers() {
 
         userStorage.addUser(new User(1, "mail@mail.ru", "sdf", "dfs", LocalDate.of(1946, 8, 20)));
         Optional<User> userOptional = userStorage.getUserFromDb(Long.valueOf(1));
