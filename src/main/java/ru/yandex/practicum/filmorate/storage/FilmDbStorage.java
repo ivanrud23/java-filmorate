@@ -141,7 +141,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void removeLikeFromFilm(Long filmId, Long userId) {
-        jdbcTemplate.execute(String.format("DELETE FROM film_likes WHERE film_id = %d AND user_id = %d", filmId, userId));
+        jdbcTemplate.execute(String.format("DELETE FROM film_likes WHERE film_id = %d AND users_id = %d", filmId, userId));
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
@@ -158,7 +158,7 @@ public class FilmDbStorage implements FilmStorage {
         genre.addAll(jdbcTemplate.query("SELECT * FROM genre WHERE genre_id IN " +
                         "(SELECT genre_id FROM film_genre WHERE film_id = ?)",
                 (rs1, rowNum) -> makeGenreFromDb(rs1), id));
-        List<Long> likedUserId = jdbcTemplate.queryForList("SELECT user_id FROM film_likes WHERE film_id = ?", Long.class, id);
+        List<Long> likedUserId = jdbcTemplate.queryForList("SELECT users_id FROM film_likes WHERE film_id = ?", Long.class, id);
 
         newFilm.setId(id);
         newFilm.setName(name);

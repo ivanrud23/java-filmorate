@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS film_genre (
 		CONSTRAINT pk_film_genre PRIMARY KEY (film_id, genre_id)
 ); 
 
-CREATE TABLE IF NOT EXISTS user_ (
-        user_id INTEGER PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS users (
+        users_id INTEGER PRIMARY KEY,
         email varchar(40) NOT NULL,
         login varchar(40) NOT NULL,
 		name varchar(40) NOT NULL,
@@ -35,13 +35,13 @@ CREATE TABLE IF NOT EXISTS user_ (
 
 CREATE TABLE IF NOT EXISTS film_likes (
         film_id INTEGER REFERENCES film (film_id),
-        user_id INTEGER REFERENCES user_ (user_id),
-		CONSTRAINT pk_film_likes PRIMARY KEY (film_id, user_id)
+        users_id INTEGER REFERENCES users (users_id),
+		CONSTRAINT pk_film_likes PRIMARY KEY (film_id, users_id)
 ); 
 
 CREATE TABLE IF NOT EXISTS friendship (
-        user_id_1 INTEGER REFERENCES user_ (user_id),
-        user_id_2 INTEGER REFERENCES user_ (user_id),
+        user_id_1 INTEGER REFERENCES users (users_id),
+        user_id_2 INTEGER REFERENCES users (users_id),
 		request BOOL,
 		confirm BOOL,
 		CONSTRAINT pk_friendship PRIMARY KEY (user_id_1, user_id_2)

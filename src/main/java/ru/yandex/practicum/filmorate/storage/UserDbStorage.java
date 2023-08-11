@@ -21,10 +21,10 @@ public class UserDbStorage implements UserStorage {
 
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        if (jdbcTemplate.queryForObject("SELECT COUNT(*) FROM user_", Integer.class) == 0) {
+        if (jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class) == 0) {
             this.idCounter = 1;
         } else {
-            this.idCounter = jdbcTemplate.queryForObject("SELECT MAX(user_id) FROM user_", Integer.class) + 1;
+            this.idCounter = jdbcTemplate.queryForObject("SELECT MAX(users_id) FROM users", Integer.class) + 1;
         }
     }
 
@@ -37,7 +37,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(User newUser) {
-        if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM user_ WHERE user_id = %d", newUser.getId()), Integer.class) == 0) {
+        if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM users WHERE users_id = %d", newUser.getId()), Integer.class) == 0) {
             throw new NoDataException("такого пользователя не существует");
         }
         addUserToDb(newUser);
@@ -46,7 +46,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
-        return jdbcTemplate.query("SELECT * FROM user_", (rs, rowNum) -> makeUser(rs));
+        return jdbcTemplate.query("SELECT * FROM users", (rs, rowNum) -> makeUser(rs));
     }
 
     @Override
@@ -63,7 +63,7 @@ public class UserDbStorage implements UserStorage {
         if (newUser.getName() == null || newUser.getName().isBlank()) {
             newUser.setName(newUser.getLogin());
         }
-        jdbcTemplate.execute(String.format("MERGE INTO user_(user_id, email, login, name, birthday) VALUES (%d, '%s', '%s','%s', '%s');",
+        jdbcTemplate.execute(String.format("MERGE INTO users(users_id, email, login, name, birthday) VALUES (%d, '%s', '%s','%s', '%s');",
                 newUser.getId(),
                 newUser.getEmail(),
                 newUser.getLogin(),
@@ -72,11 +72,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     private User getUserFromDb(Long id) {
-        if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM user_ WHERE user_id = %d", id), Integer.class) == 0) {
+        if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM users WHERE users_id = %d", id), Integer.class) == 0) {
             throw new NoDataException("такого пользователя не существует");
         }
         User user = new User();
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM user_ WHERE user_id = ?", id);
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE users_id = ?", id);
         if (userRows.next()) {
             user.setId(id);
             user.setEmail(userRows.getString("email"));
@@ -92,7 +92,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
-        long id = rs.getLong("user_id");
+        long id = rs.getLong("users_id");
         String email = rs.getString("email");
         String login = rs.getString("login");
         String name = rs.getString("name");
