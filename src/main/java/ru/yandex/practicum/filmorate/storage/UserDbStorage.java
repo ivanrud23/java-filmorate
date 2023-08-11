@@ -14,7 +14,7 @@ import java.util.List;
 
 @Component("userDbStorage")
 @Data
-public class UserDbStorage implements UserStorage{
+public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private int idCounter;
@@ -58,6 +58,7 @@ public class UserDbStorage implements UserStorage{
     public void clearUsers() {
 
     }
+
     private void addUserToDb(User newUser) {
         if (newUser.getName() == null || newUser.getName().isBlank()) {
             newUser.setName(newUser.getLogin());
@@ -98,6 +99,7 @@ public class UserDbStorage implements UserStorage{
         LocalDate birthday = rs.getDate("birthday").toLocalDate();
         return new User(id, email, login, name, birthday);
     }
+
     public int counter() {
         return idCounter++;
     }
@@ -105,7 +107,7 @@ public class UserDbStorage implements UserStorage{
     @Override
     public void addUsersToFriend(User user1, User user2) {
         boolean confirm = (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM friendship WHERE user_id_1 = %d " +
-                        "AND user_id_2 = %d AND request = TRUE", user2.getId(), user1.getId()), Integer.class) != 0);
+                "AND user_id_2 = %d AND request = TRUE", user2.getId(), user1.getId()), Integer.class) != 0);
         jdbcTemplate.execute(String.format("INSERT INTO friendship VALUES(%d, %d, TRUE, TRUE)", user1.getId(), user2.getId()));
         jdbcTemplate.execute(String.format("INSERT INTO friendship VALUES(%d, %d, TRUE, %b)", user2.getId(), user1.getId(), confirm));
     }

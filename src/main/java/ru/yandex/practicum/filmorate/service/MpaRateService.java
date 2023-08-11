@@ -18,6 +18,7 @@ public class MpaRateService {
     public List<MpaRate> getAllMpa() {
         return filmStorage.getAllMpa();
     }
+
     public MpaRate getMpaById(Long id) {
         return filmStorage.getMpaById(id);
     }
