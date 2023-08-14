@@ -31,6 +31,5 @@ public class Film {
     private final Set<Long> likedUserId = new HashSet<>();
     private MpaRate mpa;
     private Set<Genre> genres = new TreeSet<>(Comparator.comparing(Genre::getId));
-
 }
 

@@ -4,7 +4,10 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NoDataException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -36,17 +39,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> getById(Long id) {
+    public User getById(Long id) {
         if (!userStorage.containsKey(id)) {
             throw new NoDataException("такого пользователя не существует");
         }
-        return Optional.of(userStorage.get(id));
-    }
-
-    @Override
-    public void clearUsers() {
-        userStorage.clear();
-        idCounter = 1;
+        return userStorage.get(id);
     }
 
     @Override

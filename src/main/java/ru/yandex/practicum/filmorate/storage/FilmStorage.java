@@ -18,8 +18,6 @@ public interface FilmStorage {
 
     List<Film> getAllFilms();
 
-    void clearFilms();
-
     Genre getGenreById(Long id);
 
     List<MpaRate> getAllMpa();

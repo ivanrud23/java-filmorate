@@ -16,41 +16,30 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-@Component("filmDbStorage")
+@Component
 @Data
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private int idCounter;
-
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        if (jdbcTemplate.queryForObject("SELECT COUNT(*) FROM film", Integer.class) == 0) {
-            this.idCounter = 1;
-        } else {
-            this.idCounter = jdbcTemplate.queryForObject("SELECT MAX(film_id) FROM film", Integer.class) + 1;
-        }
-    }
 
     @Override
     public Film addFilm(Film newFilm) {
-        newFilm.setId(counter());
         addFilmToDb(newFilm);
         return newFilm;
     }
 
     @Override
     public Film updateFilm(Film newFilm) {
-        if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM film WHERE film_id = %d", newFilm.getId()), Integer.class) == 0) {
+        if (!jdbcTemplate.queryForObject(String.format("SELECT EXISTS (SELECT 1 FROM film WHERE film_id = %d)", newFilm.getId()), Boolean.class)) {
             throw new NoDataException("такого фильма не существует");
         }
-        addFilmToDb(newFilm);
+        updateFilmToDb(newFilm);
         return newFilm;
     }
 
     @Override
     public Film getFilmById(Long id) {
-        if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM film WHERE film_id = %d", id), Integer.class) == 0) {
+        if (!jdbcTemplate.queryForObject(String.format("SELECT EXISTS (SELECT 1 FROM film WHERE film_id = %d)", id), Boolean.class)) {
             throw new NoDataException("такого пользователя не существует");
         }
         return jdbcTemplate.queryForObject("SELECT * FROM film WHERE film_id = ?", (rs, rowNum) -> makeFilm(rs), id);
@@ -62,13 +51,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void clearFilms() {
-
-    }
-
-    @Override
     public MpaRate getMpaById(Long id) {
-        if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM mpa_rate WHERE mpa_rate_id = %d", id), Integer.class) == 0) {
+        if (!jdbcTemplate.queryForObject(String.format("SELECT EXISTS (SELECT 1 FROM mpa_rate WHERE mpa_rate_id = %d)", id), Boolean.class)) {
             throw new NoDataException("такого рейтинга не существует");
         }
         return jdbcTemplate.queryForObject("SELECT * FROM mpa_rate WHERE mpa_rate_id = ?", (rs, rowNum) -> makeMpaFromDb(rs), id);
@@ -81,7 +65,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Genre getGenreById(Long id) {
-        if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM genre WHERE genre_id = %d", id), Integer.class) == 0) {
+        if (!jdbcTemplate.queryForObject(String.format("SELECT EXISTS (SELECT 1 FROM genre WHERE genre_id = %d)", id), Boolean.class)) {
             throw new NoDataException("такого жанра не существует");
         }
         return jdbcTemplate.queryForObject("SELECT * FROM genre WHERE genre_id = ?", (rs, rowNum) -> makeGenreFromDb(rs), id);
@@ -92,14 +76,40 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query("SELECT * FROM genre", (rs, rowNum) -> makeGenreFromDb(rs));
     }
 
-    public int counter() {
-        return idCounter++;
-    }
-
     public void addFilmToDb(Film newFilm) {
         long mpaId = newFilm.getMpa().getId();
+        jdbcTemplate.execute(String.format("INSERT INTO film(" +
+                        "name, " +
+                        "description, " +
+                        "release_date, " +
+                        "duration, " +
+                        "mpa_rate_id) VALUES ('%s', '%s', '%s', %d, %d);",
+                newFilm.getName(),
+                newFilm.getDescription(),
+                newFilm.getReleaseDate(),
+                newFilm.getDuration(),
+                mpaId));
+        newFilm.setId(getFilmIdFromFDb());
+
+        if (newFilm.getGenres() != null) {
+            jdbcTemplate.execute(String.format("DELETE FROM film_genre WHERE film_id = %d;",
+                    newFilm.getId()));
+            Set<Genre> genres = new TreeSet<>(Comparator.comparing(Genre::getId));
+            for (Genre genre : newFilm.getGenres()) {
+                genres.add(getGenreById(genre.getId().longValue()));
+                jdbcTemplate.execute(String.format("INSERT INTO film_genre VALUES (%d, %d);",
+                        newFilm.getId(),
+                        genre.getId()));
+            }
+        }
+    }
+
+
+    public void updateFilmToDb(Film newFilm) {
+        long mpaId = newFilm.getMpa().getId();
         jdbcTemplate.execute(String.format("MERGE INTO film(" +
-                        "film_id, name, " +
+                        "film_id, " +
+                        "name, " +
                         "description, " +
                         "release_date, " +
                         "duration, " +
@@ -113,13 +123,6 @@ public class FilmDbStorage implements FilmStorage {
                 newFilm.getRate(),
                 mpaId));
 
-        if (newFilm.getMpa() != null) {
-            jdbcTemplate.execute(String.format("MERGE INTO film(film_id, mpa_rate_id) VALUES (%d, %d);",
-                    newFilm.getId(),
-                    newFilm.getMpa().getId()));
-            newFilm.setMpa(getMpaById(mpaId));
-        }
-
         if (newFilm.getGenres() != null) {
             jdbcTemplate.execute(String.format("DELETE FROM film_genre WHERE film_id = %d;",
                     newFilm.getId()));
@@ -130,9 +133,9 @@ public class FilmDbStorage implements FilmStorage {
                         newFilm.getId(),
                         genre.getId()));
             }
-            newFilm.setGenres(genres);
         }
     }
+
 
     @Override
     public void addLikeToFilm(Long filmId, Long userId) {
@@ -179,5 +182,9 @@ public class FilmDbStorage implements FilmStorage {
 
     private Genre makeGenreFromDb(ResultSet rs) throws SQLException {
         return new Genre(rs.getInt("genre_id"), rs.getString("name"));
+    }
+
+    private long getFilmIdFromFDb() {
+        return jdbcTemplate.queryForObject("SELECT MAX(film_id) FROM film", Long.class);
     }
 }

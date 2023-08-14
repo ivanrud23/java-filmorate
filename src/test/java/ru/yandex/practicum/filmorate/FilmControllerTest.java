@@ -26,7 +26,6 @@ class FilmControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-
     @Test
     void addFilm() throws Exception {
         Film film = new Film();
@@ -50,7 +49,6 @@ class FilmControllerTest {
         mockMvc.perform(get("/films/clear")
                 .contentType(MediaType.APPLICATION_JSON));
     }
-
 
     @Test
     void updateFilm() throws Exception {

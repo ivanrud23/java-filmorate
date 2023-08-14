@@ -55,12 +55,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void clearFilms() {
-        filmStorage.clear();
-        idCounter = 1;
-    }
-
-    @Override
     public Genre getGenreById(Long id) {
         return null;
     }

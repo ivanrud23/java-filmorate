@@ -11,37 +11,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
-@Component("userDbStorage")
+@Component
 @Data
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private int idCounter;
-
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        if (jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class) == 0) {
-            this.idCounter = 1;
-        } else {
-            this.idCounter = jdbcTemplate.queryForObject("SELECT MAX(users_id) FROM users", Integer.class) + 1;
-        }
-    }
 
     @Override
     public User addUser(User newUser) {
-        newUser.setId(counter());
         addUserToDb(newUser);
         return newUser;
     }
 
     @Override
     public User updateUser(User newUser) {
-        if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM users WHERE users_id = %d", newUser.getId()), Integer.class) == 0) {
+        if (!jdbcTemplate.queryForObject(String.format("SELECT EXISTS (SELECT 1 FROM users WHERE users_id = %d)", newUser.getId()), Boolean.class)) {
             throw new NoDataException("такого пользователя не существует");
         }
-        addUserToDb(newUser);
+        updateUserToDb(newUser);
         return newUser;
     }
 
@@ -51,16 +39,23 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> getById(Long id) {
+    public User getById(Long id) {
         return getUserFromDb(id);
     }
 
-    @Override
-    public void clearUsers() {
-
+    private void addUserToDb(User newUser) {
+        if (newUser.getName() == null || newUser.getName().isBlank()) {
+            newUser.setName(newUser.getLogin());
+        }
+        jdbcTemplate.execute(String.format("INSERT INTO users(email, login, name, birthday) VALUES ('%s', '%s','%s', '%s');",
+                newUser.getEmail(),
+                newUser.getLogin(),
+                newUser.getName(),
+                newUser.getBirthday()));
+        newUser.setId(getUserIdFromFDb());
     }
 
-    private void addUserToDb(User newUser) {
+    private void updateUserToDb(User newUser) {
         if (newUser.getName() == null || newUser.getName().isBlank()) {
             newUser.setName(newUser.getLogin());
         }
@@ -70,10 +65,11 @@ public class UserDbStorage implements UserStorage {
                 newUser.getLogin(),
                 newUser.getName(),
                 newUser.getBirthday()));
+        newUser.setId(getUserIdFromFDb());
     }
 
-    public Optional<User> getUserFromDb(Long id) {
-        if (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM users WHERE users_id = %d", id), Integer.class) == 0) {
+    public User getUserFromDb(Long id) {
+        if (!jdbcTemplate.queryForObject(String.format("SELECT EXISTS (SELECT 1 FROM users WHERE users_id = %d)", id), Boolean.class)) {
             throw new NoDataException("такого пользователя не существует");
         }
         User user = new User();
@@ -85,11 +81,11 @@ public class UserDbStorage implements UserStorage {
             user.setName(userRows.getString("name"));
             user.setBirthday(userRows.getDate("birthday").toLocalDate());
         }
-        List<Long> friendsRows = jdbcTemplate.queryForList(String.format("SELECT user_id_2 FROM friendship WHERE user_id_1 = %d AND confirm = TRUE", id), Long.class);
+        List<Long> friendsRows = jdbcTemplate.queryForList(String.format("SELECT user_id_2 FROM friendship WHERE user_id_1 = %d", id), Long.class);
         if (!friendsRows.isEmpty()) {
             user.getFriends().addAll(friendsRows);
         }
-        return Optional.of(user);
+        return user;
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
@@ -101,21 +97,17 @@ public class UserDbStorage implements UserStorage {
         return new User(id, email, login, name, birthday);
     }
 
-    public int counter() {
-        return idCounter++;
-    }
-
     @Override
     public void addUsersToFriend(User user1, User user2) {
-        boolean confirm = (jdbcTemplate.queryForObject(String.format("SELECT COUNT(*) FROM friendship WHERE user_id_1 = %d " +
-                "AND user_id_2 = %d AND request = TRUE", user2.getId(), user1.getId()), Integer.class) != 0);
-        jdbcTemplate.execute(String.format("INSERT INTO friendship VALUES(%d, %d, TRUE, TRUE)", user1.getId(), user2.getId()));
-        jdbcTemplate.execute(String.format("INSERT INTO friendship VALUES(%d, %d, TRUE, %b)", user2.getId(), user1.getId(), confirm));
+        jdbcTemplate.execute(String.format("INSERT INTO friendship VALUES(%d, %d, TRUE)", user1.getId(), user2.getId()));
     }
 
     @Override
     public void removeUserFromFriends(User user1, User user2) {
         jdbcTemplate.execute(String.format("DELETE FROM friendship WHERE user_id_1 = %d AND user_id_2 = %d", user1.getId(), user2.getId()));
-        jdbcTemplate.execute(String.format("MERGE INTO friendship VALUES(%d, %d, TRUE, FALSE)", user2.getId(), user1.getId()));
+    }
+
+    private long getUserIdFromFDb() {
+        return jdbcTemplate.queryForObject("SELECT MAX(users_id) FROM users", Long.class);
     }
 }

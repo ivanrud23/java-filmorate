@@ -11,21 +11,21 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
+import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor(onConstructor_=@Autowired)
 
 public class UserDbStorageTest {
 
-    private final ru.yandex.practicum.filmorate.storage.UserDbStorage userStorage;
+    private final UserDbStorage userStorage;
 
     @Test
     public void testCreateFindUserById() {
 
         userStorage.addUser(new User(1, "mail@mail.ru", "sdf", "dfs", LocalDate.of(1946, 8, 20)));
-        Optional<User> userOptional = userStorage.getUserFromDb(Long.valueOf(1));
+        Optional<User> userOptional = Optional.of(userStorage.getUserFromDb(Long.valueOf(1)));
 
         assertThat(userOptional)
                 .isPresent()
@@ -39,7 +39,7 @@ public class UserDbStorageTest {
 
         userStorage.addUser(new User(1, "mail@mail.ru", "sdf", "dfs", LocalDate.of(1946, 8, 20)));
         userStorage.updateUser(new User(1, "Update_mail@mail.ru", "Update_login", "update_name", LocalDate.of(1941, 9, 21)));
-        Optional<User> userOptional = userStorage.getUserFromDb(Long.valueOf(1));
+        Optional<User> userOptional = Optional.of(userStorage.getUserFromDb(Long.valueOf(1)));
 
         assertThat(userOptional)
                 .isPresent()
