@@ -21,6 +21,9 @@ import java.util.TreeSet;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final MpaDbStorage mpaDbStorage;
+    private final GenreDbStorage genreDbStorage;
+
 
     @Override
     public Film addFilm(Film newFilm) {
@@ -50,33 +53,8 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query("SELECT * FROM film", (rs, rowNum) -> makeFilm(rs));
     }
 
-    @Override
-    public MpaRate getMpaById(Long id) {
-        if (!jdbcTemplate.queryForObject(String.format("SELECT EXISTS (SELECT 1 FROM mpa_rate WHERE mpa_rate_id = %d)", id), Boolean.class)) {
-            throw new NoDataException("такого рейтинга не существует");
-        }
-        return jdbcTemplate.queryForObject("SELECT * FROM mpa_rate WHERE mpa_rate_id = ?", (rs, rowNum) -> makeMpaFromDb(rs), id);
-    }
 
-    @Override
-    public List<MpaRate> getAllMpa() {
-        return jdbcTemplate.query("SELECT * FROM mpa_rate", (rs, rowNum) -> makeMpaFromDb(rs));
-    }
-
-    @Override
-    public Genre getGenreById(Long id) {
-        if (!jdbcTemplate.queryForObject(String.format("SELECT EXISTS (SELECT 1 FROM genre WHERE genre_id = %d)", id), Boolean.class)) {
-            throw new NoDataException("такого жанра не существует");
-        }
-        return jdbcTemplate.queryForObject("SELECT * FROM genre WHERE genre_id = ?", (rs, rowNum) -> makeGenreFromDb(rs), id);
-    }
-
-    @Override
-    public List<Genre> getAllGenre() {
-        return jdbcTemplate.query("SELECT * FROM genre", (rs, rowNum) -> makeGenreFromDb(rs));
-    }
-
-    public void addFilmToDb(Film newFilm) {
+    private void addFilmToDb(Film newFilm) {
         long mpaId = newFilm.getMpa().getId();
         jdbcTemplate.execute(String.format("INSERT INTO film(" +
                         "name, " +
@@ -94,9 +72,7 @@ public class FilmDbStorage implements FilmStorage {
         if (newFilm.getGenres() != null) {
             jdbcTemplate.execute(String.format("DELETE FROM film_genre WHERE film_id = %d;",
                     newFilm.getId()));
-            Set<Genre> genres = new TreeSet<>(Comparator.comparing(Genre::getId));
             for (Genre genre : newFilm.getGenres()) {
-                genres.add(getGenreById(genre.getId().longValue()));
                 jdbcTemplate.execute(String.format("INSERT INTO film_genre VALUES (%d, %d);",
                         newFilm.getId(),
                         genre.getId()));
@@ -104,8 +80,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-
-    public void updateFilmToDb(Film newFilm) {
+    private void updateFilmToDb(Film newFilm) {
         long mpaId = newFilm.getMpa().getId();
         jdbcTemplate.execute(String.format("MERGE INTO film(" +
                         "film_id, " +
@@ -128,7 +103,7 @@ public class FilmDbStorage implements FilmStorage {
                     newFilm.getId()));
             Set<Genre> genres = new TreeSet<>(Comparator.comparing(Genre::getId));
             for (Genre genre : newFilm.getGenres()) {
-                genres.add(getGenreById(genre.getId().longValue()));
+                genres.add(genreDbStorage.getGenreById(genre.getId().longValue()));
                 jdbcTemplate.execute(String.format("INSERT INTO film_genre VALUES (%d, %d);",
                         newFilm.getId(),
                         genre.getId()));
@@ -156,11 +131,11 @@ public class FilmDbStorage implements FilmStorage {
         int duration = rs.getInt("duration");
         int rate = rs.getInt("rate");
         MpaRate mpa = jdbcTemplate.queryForObject("SELECT * FROM mpa_rate WHERE mpa_rate_id = ?",
-                (rs1, rowNum) -> makeMpaFromDb(rs1), rs.getInt("mpa_rate_id"));
+                (rs1, rowNum) -> mpaDbStorage.makeMpaFromDb(rs1), rs.getInt("mpa_rate_id"));
         Set<Genre> genre = new TreeSet<>(Comparator.comparing(Genre::getId));
         genre.addAll(jdbcTemplate.query("SELECT * FROM genre WHERE genre_id IN " +
                         "(SELECT genre_id FROM film_genre WHERE film_id = ?)",
-                (rs1, rowNum) -> makeGenreFromDb(rs1), id));
+                (rs1, rowNum) -> genreDbStorage.makeGenreFromDb(rs1), id));
         List<Long> likedUserId = jdbcTemplate.queryForList("SELECT users_id FROM film_likes WHERE film_id = ?", Long.class, id);
 
         newFilm.setId(id);
@@ -175,14 +150,6 @@ public class FilmDbStorage implements FilmStorage {
         return newFilm;
     }
 
-
-    private MpaRate makeMpaFromDb(ResultSet rs) throws SQLException {
-        return new MpaRate(rs.getInt("mpa_rate_id"), rs.getString("name"));
-    }
-
-    private Genre makeGenreFromDb(ResultSet rs) throws SQLException {
-        return new Genre(rs.getInt("genre_id"), rs.getString("name"));
-    }
 
     private long getFilmIdFromFDb() {
         return jdbcTemplate.queryForObject("SELECT MAX(film_id) FROM film", Long.class);

@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate.storage;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NoDataException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MpaRate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,11 +39,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public MpaRate getMpaById(Long id) {
-        return null;
-    }
-
-    @Override
     public List<Film> getAllFilms() {
         return new ArrayList<>(filmStorage.values());
     }
@@ -54,20 +47,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         return idCounter++;
     }
 
-    @Override
-    public Genre getGenreById(Long id) {
-        return null;
-    }
-
-    @Override
-    public List<MpaRate> getAllMpa() {
-        return null;
-    }
-
-    @Override
-    public List<Genre> getAllGenre() {
-        return null;
-    }
 
     @Override
     public void addLikeToFilm(Long filmId, Long userId) {

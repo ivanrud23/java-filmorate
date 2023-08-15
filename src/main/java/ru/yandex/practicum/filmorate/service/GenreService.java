@@ -1,10 +1,9 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.util.List;
 
@@ -12,14 +11,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenreService {
 
-    @Qualifier("filmDbStorage")
-    private final FilmStorage filmStorage;
+
+    private final GenreStorage genreDbStorage;
 
     public Genre getGenreById(Long id) {
-        return filmStorage.getGenreById(id);
+        return genreDbStorage.getGenreById(id);
     }
 
     public List<Genre> getAllGenre() {
-        return filmStorage.getAllGenre();
+        return genreDbStorage.getAllGenre();
     }
 }
