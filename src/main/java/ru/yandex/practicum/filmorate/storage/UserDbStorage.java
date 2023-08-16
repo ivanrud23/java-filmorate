@@ -107,7 +107,7 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.execute(String.format("DELETE FROM friendship WHERE user_id_1 = %d AND user_id_2 = %d", user1.getId(), user2.getId()));
     }
 
-    private long getUserIdFromFDb() {
+    public long getUserIdFromFDb() {
         return jdbcTemplate.queryForObject("SELECT MAX(users_id) FROM users", Long.class);
     }
 }
