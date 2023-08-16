@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NoDataException;
@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 @Component
-@Data
+@AllArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
@@ -101,9 +101,7 @@ public class FilmDbStorage implements FilmStorage {
         if (newFilm.getGenres() != null) {
             jdbcTemplate.execute(String.format("DELETE FROM film_genre WHERE film_id = %d;",
                     newFilm.getId()));
-            Set<Genre> genres = new TreeSet<>(Comparator.comparing(Genre::getId));
             for (Genre genre : newFilm.getGenres()) {
-                genres.add(genreDbStorage.getGenreById(genre.getId().longValue()));
                 jdbcTemplate.execute(String.format("INSERT INTO film_genre VALUES (%d, %d);",
                         newFilm.getId(),
                         genre.getId()));

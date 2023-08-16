@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component
-@Data
+@AllArgsConstructor
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
@@ -68,7 +68,7 @@ public class UserDbStorage implements UserStorage {
         newUser.setId(getUserIdFromFDb());
     }
 
-    public User getUserFromDb(Long id) {
+    private User getUserFromDb(Long id) {
         if (!jdbcTemplate.queryForObject(String.format("SELECT EXISTS (SELECT 1 FROM users WHERE users_id = %d)", id), Boolean.class)) {
             throw new NoDataException("такого пользователя не существует");
         }

@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NoDataException;
@@ -12,7 +12,7 @@ import java.util.List;
 
 
 @Component
-@Data
+@AllArgsConstructor
 public class GenreDbStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
