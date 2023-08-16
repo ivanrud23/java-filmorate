@@ -68,7 +68,7 @@ public class UserDbStorage implements UserStorage {
         newUser.setId(getUserIdFromFDb());
     }
 
-    private User getUserFromDb(Long id) {
+    public User getUserFromDb(Long id) {
         if (!jdbcTemplate.queryForObject(String.format("SELECT EXISTS (SELECT 1 FROM users WHERE users_id = %d)", id), Boolean.class)) {
             throw new NoDataException("такого пользователя не существует");
         }
