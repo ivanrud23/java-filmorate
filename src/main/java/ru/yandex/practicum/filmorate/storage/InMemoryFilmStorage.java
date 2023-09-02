@@ -47,9 +47,14 @@ public class InMemoryFilmStorage implements FilmStorage {
         return idCounter++;
     }
 
+
     @Override
-    public void clearFilms() {
-        filmStorage.clear();
-        idCounter = 1;
+    public void addLikeToFilm(Long filmId, Long userId) {
+
+    }
+
+    @Override
+    public void removeLikeFromFilm(Long filmId, Long userId) {
+
     }
 }

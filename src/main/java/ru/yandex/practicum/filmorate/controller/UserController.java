@@ -57,10 +57,4 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/clear")
-    public void clearUsers() {
-        userService.clearUsers();
-    }
-
-
 }

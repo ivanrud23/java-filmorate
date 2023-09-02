@@ -58,12 +58,6 @@ public class FilmController {
             throw new ValidationException("id is empty");
         }
         return filmService.getFilmById(id);
-
-    }
-
-    @GetMapping("/clear")
-    public void clearFilms() {
-        filmService.clearFilms();
     }
 
 

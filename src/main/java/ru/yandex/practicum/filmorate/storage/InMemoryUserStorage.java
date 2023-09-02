@@ -47,9 +47,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void clearUsers() {
-        userStorage.clear();
-        idCounter = 1;
+    public void addUsersToFriend(User user1, User user2) {
+
+    }
+
+    @Override
+    public void removeUserFromFriends(User user1, User user2) {
+
     }
 
     public int counter() {

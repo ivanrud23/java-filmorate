@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.MpaRate;
 
 import java.time.LocalDate;
 
@@ -25,10 +26,16 @@ class FilmControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-
     @Test
     void addFilm() throws Exception {
-        Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100);
+        Film film = new Film();
+        film.setId(1);
+        film.setName("nisi eiusmod");
+        film.setDescription("adipisicing");
+        film.setReleaseDate(LocalDate.of(1967, 3, 25));
+        film.setDuration(100);
+        film.setMpa(new MpaRate(1, "G"));
+
         mockMvc.perform(post("/films")
                         .content(objectMapper.writeValueAsString(film))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -43,11 +50,22 @@ class FilmControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
     }
 
-
     @Test
     void updateFilm() throws Exception {
-        Film film = new Film(1, "nisi eiusmod", "adipisicing", LocalDate.of(1967, 3, 25), 100);
-        Film updateFilm = new Film(1, "Film Updated", "New film update decription", LocalDate.of(1989, 4, 17), 190);
+        Film film = new Film();
+        film.setId(1);
+        film.setName("nisi eiusmod");
+        film.setDescription("adipisicing");
+        film.setReleaseDate(LocalDate.of(1967, 3, 25));
+        film.setDuration(100);
+        film.setMpa(new MpaRate(1, "G"));
+        Film updateFilm = new Film();
+        updateFilm.setId(1);
+        updateFilm.setName("Film Updated");
+        updateFilm.setDescription("New film update decription");
+        updateFilm.setReleaseDate(LocalDate.of(1989, 4, 17));
+        updateFilm.setDuration(190);
+        updateFilm.setMpa(new MpaRate(1, "G"));
         mockMvc.perform(post("/films")
                 .content(objectMapper.writeValueAsString(film))
                 .contentType(MediaType.APPLICATION_JSON)
